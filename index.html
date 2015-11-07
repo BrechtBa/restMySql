@@ -18,145 +18,439 @@
 
 		<!-- custom -->
 		<script type='text/javascript'>
-			// POST
-			$(document).on('click','#POST',function(){
+
+			var user_id = 0;
+			var token = '';
+
+			//REGISTER
+			$(document).on('submit','#REGISTER',function(event){
+				event.preventDefault();
+
+				var login = $('#REGISTER').find('[name="login"]').val();
+				var password = $('#REGISTER').find('[name="password"]').val();
+				
 				$.ajax({
 					type: 'POST',
 					dataType: 'json',
-					url: 'api/index.php/testtable/',
-					data: {'spam':Math.round(100*Math.random()), 'eggs':'See the holy grail lies over the horizon', 'bacon':'foo bar'},
-					headers: {'Authentication': 'token'},
+					url: 'api/register.php',
+					data: {'login':login, 'password':password},
+					success: function(data,status,response){
+						console.log('success');
+						console.log(data);
+						console.log(status);
+						console.log(response);
+					},
+					error: function(data,status,response){
+						console.log('error');
+						console.log(data);
+						console.log(status);
+						console.log(response);
+					}
+				});
+			});
+			// AUTHENTICATE
+			$(document).on('submit','#AUTHENTICATE',function(event){
+				event.preventDefault();
+
+				var login = $('#AUTHENTICATE').find('[name="login"]').val();
+				var password = $('#AUTHENTICATE').find('[name="password"]').val();
+				
+				$.ajax({
+					type: 'POST',
+					dataType: 'json',
+					url: 'api/authenticate.php',
+					data: {'login':login, 'password':password},
+					success: function(data,status,response){
+						console.log('success');
+						console.log(data);
+						console.log(status);
+						console.log(response);
+						token = data;
+
+						// make the token readable
+						var parts = token.split('.');
+			
+						var header = JSON.parse(atob(parts[0]));
+						var payload = JSON.parse(atob(parts[1]));
+
+						console.log(header);
+						console.log(payload);
+						user_id = payload['user_id'];
+
+					},
+					error: function(data,status,response){
+						console.log('error');
+						console.log(data);
+						console.log(status);
+						console.log(response);
+					}
+				});
+			});
+			// POST_A
+			$(document).on('submit','#POST_A',function(event){
+				event.preventDefault();
+
+				var spam = $('#POST_A').find('[name="spam"]').val();
+				var eggs = $('#POST_A').find('[name="eggs"]').val();
+				var bacon =$('#POST_A').find('[name="bacon"]').val();
+
+				$.ajax({
+					type: 'POST',
+					dataType: 'json',
+					url: 'api/index.php/table_a/',
+					data: {'spam':spam, 'eggs':eggs, 'bacon':bacon},
+					headers: {'Authentication': token},
 					success: function(data,status,response){
 						console.log('success');
 						console.log(data);
 						console.log(status);
 						console.log(response);
 						console.log(response.getResponseHeader('Location'));
+
+						$('#status').html( JSON.stringify(status) );
+						$('#data').html( JSON.stringify(data) );
+						$('#location_header').html( response.getResponseHeader('Location') );
 					},
 					error: function(data,status,response){
 						console.log('error');
 						console.log(data);
 						console.log(status);
 						console.log(response);
+
+						$('#status').html( JSON.stringify(status) );
 					}
 				});
 			});
-			// GET ALL
-			$(document).on('click','#GET_ALL',function(){
+			// POST_B
+			$(document).on('submit','#POST_B',function(event){
+				event.preventDefault();
+
+				var spam = $('#POST_B').find('[name="spam"]').val();
+				var eggs =$('#POST_B').find('[name="eggs"]').val();
+
+				$.ajax({
+					type: 'POST',
+					dataType: 'json',
+					url: 'api/index.php/table_b/',
+					data: {'user_id':user_id, 'spam':spam, 'eggs':eggs},
+					headers: {'Authentication': token},
+					success: function(data,status,response){
+						console.log('success');
+						console.log(data);
+						console.log(status);
+						console.log(response);
+						console.log(response.getResponseHeader('Location'));
+
+						$('#status').html( JSON.stringify(status) );
+						$('#data').html( JSON.stringify(data) );
+						$('#location_header').html( response.getResponseHeader('Location') );
+					},
+					error: function(data,status,response){
+						console.log('error');
+						console.log(data);
+						console.log(status);
+						console.log(response);
+
+						$('#status').html( JSON.stringify(status) );
+					}
+				});
+			});
+			// GET_A
+			$(document).on('submit','#GET_A',function(event){
+				event.preventDefault();
+
+				var id = $('#GET_A').find('[name="id"]').val();
+
 				$.ajax({
 					type: 'GET',
 					dataType: 'json',
-					url: 'api/index.php/testtable/',
-					headers: {'Authentication': 'token'},
+					url: 'api/index.php/table_a/'+id,
+					headers: {'Authentication': token},
 					success: function(data,status,response){
 						console.log('success');
 						console.log(data);
 						console.log(status);
 						console.log(response);
+
+						$('#status').html( JSON.stringify(status) );
+						$('#data').html( JSON.stringify(data) );
+						$('#location_header').html( '' );
 					},
 					error: function(data,status,response){
 						console.log('error');
 						console.log(data);
 						console.log(status);
 						console.log(response);
+
+						$('#status').html( JSON.stringify(status) );
 					}
 				});
 			});
-			// GET ONE
-			$(document).on('click','#GET_ONE',function(){
+			// GET_B
+			$(document).on('submit','#GET_B',function(event){
+				event.preventDefault();
+
+				var id = $('#GET_B').find('[name="id"]').val();
+				
+				var url = 'api/index.php/table_b/user_id/'+user_id;
+				if(id!=''){
+					var url = 'api/index.php/table_b/id/'+id+'/user_id/'+user_id;
+				}
 				$.ajax({
 					type: 'GET',
 					dataType: 'json',
-					url: 'api/index.php/testtable/1',
-					headers: {'Authentication': 'token'},
+					url: url,
+					headers: {'Authentication': token},
 					success: function(data,status,response){
 						console.log('success');
 						console.log(data);
 						console.log(status);
 						console.log(response);
+
+						$('#status').html( JSON.stringify(status) );
+						$('#data').html( JSON.stringify(data) );
+						$('#location_header').html( '' );
 					},
 					error: function(data,status,response){
 						console.log('error');
 						console.log(data);
 						console.log(status);
 						console.log(response);
+
+						$('#status').html( JSON.stringify(status) );
 					}
 				});
 			});
-			// PUT
-			$(document).on('click','#PUT',function(){
+			// PUT_A
+			$(document).on('submit','#PUT_A',function(event){
+				event.preventDefault();
+
+				var id = $('#PUT_A').find('[name="id"]').val();
+				var spam = $('#PUT_A').find('[name="spam"]').val();
+				var eggs = $('#PUT_A').find('[name="eggs"]').val();
+				var bacon =$('#PUT_A').find('[name="bacon"]').val();
+
 				$.ajax({
 					type: 'PUT',
 					dataType: 'json',
-					url: 'api/index.php/testtable/1',
-					data: {'spam':Math.round(100*Math.random()), 'eggs':'temp', 'bacon':'foo bar'},
-					headers: {'Authentication': 'token'},
+					url: 'api/index.php/table_a/'+id,
+					data: {'spam':spam, 'eggs':eggs, 'bacon':bacon},
+					headers: {'Authentication': token},
 					success: function(data,status,response){
 						console.log('success');
 						console.log(data);
 						console.log(status);
 						console.log(response);
+
+						$('#status').html( JSON.stringify(status) );
+						$('#data').html( JSON.stringify(data) );
+						$('#location_header').html( '' );
 					},
 					error: function(data,status,response){
 						console.log('error');
 						console.log(data);
 						console.log(status);
 						console.log(response);
+
+						$('#status').html( JSON.stringify(status) );
 					}
 				});
 			});
-			// PUT WHERE
-			$(document).on('click','#PUT_WHERE',function(){
+			// PUT_B
+			$(document).on('submit','#PUT_B',function(event){
+				event.preventDefault();
+
+				var id = $('#PUT_B').find('[name="id"]').val();
+				var spam = $('#PUT_B').find('[name="spam"]').val();
+				var eggs = $('#PUT_B').find('[name="eggs"]').val();
+				var bacon =$('#PUT_B').find('[name="bacon"]').val();
+
 				$.ajax({
 					type: 'PUT',
 					dataType: 'json',
-					url: 'api/index.php/testtable/eggs/temp',
-					data: {'spam':Math.round(100*Math.random()), 'eggs':'blablabla', 'bacon':'foo bar'},
-					headers: {'Authentication': 'token'},
+					url: 'api/index.php/table_b/user_id/'+user_id+'/id/'+id,
+					data: {'spam':spam, 'eggs':eggs},
+					headers: {'Authentication': token},
 					success: function(data,status,response){
 						console.log('success');
 						console.log(data);
 						console.log(status);
 						console.log(response);
+
+						$('#status').html( JSON.stringify(status) );
+						$('#data').html( JSON.stringify(data) );
+						$('#location_header').html( '' );
 					},
 					error: function(data,status,response){
 						console.log('error');
 						console.log(data);
 						console.log(status);
 						console.log(response);
+
+						$('#status').html( JSON.stringify(status) );
 					}
 				});
 			});
-			// DELETE WHERE
-			$(document).on('click','#DELETE',function(){
+			// DELETE_A
+			$(document).on('submit','#DELETE_A',function(event){
+				event.preventDefault();
+
+				var id = $('#DELETE_A').find('[name="id"]').val();
+
 				$.ajax({
 					type: 'DELETE',
 					dataType: 'json',
-					url: 'api/index.php/testtable/10',
-					headers: {'Authentication': 'token'},
+					url: 'api/index.php/table_a/'+id,
+					headers: {'Authentication': token},
 					success: function(data,status,response){
 						console.log('success');
 						console.log(data);
 						console.log(status);
 						console.log(response);
+
+						$('#status').html( JSON.stringify(status) );
+						$('#data').html( JSON.stringify(data) );
+						$('#location_header').html( '' );
 					},
 					error: function(data,status,response){
 						console.log('error');
 						console.log(data);
 						console.log(status);
 						console.log(response);
+
+						$('#status').html( JSON.stringify(status) );
+					}
+				});
+			});
+			// DELETE_B
+			$(document).on('submit','#DELETE_B',function(event){
+				event.preventDefault();
+
+				var id = $('#DELETE_B').find('[name="id"]').val();
+
+				$.ajax({
+					type: 'DELETE',
+					dataType: 'json',
+					url: 'api/index.php/table_b/user_id/'+user_id+'/id/'+id,
+					headers: {'Authentication': token},
+					success: function(data,status,response){
+						console.log('success');
+						console.log(data);
+						console.log(status);
+						console.log(response);
+
+						$('#status').html( JSON.stringify(status) );
+						$('#data').html( JSON.stringify(data) );
+						$('#location_header').html( '' );
+					},
+					error: function(data,status,response){
+						console.log('error');
+						console.log(data);
+						console.log(status);
+						console.log(response);
+
+						$('#status').html( JSON.stringify(status) );
 					}
 				});
 			});
 		</script>
 	</head>
 	<body>
-		<a id="POST" href="#">POST</a>
-		<a id="GET_ALL" href="#">GET ALL</a>
-		<a id="GET_ONE" href="#">GET ONE</a>
-		<a id="PUT" href="#">PUT</a>
-		<a id="PUT_WHERE" href="#">PUT_WHERE</a>
-		<a id="DELETE" href="#">DELETE</a>
+		<div>
+			<div>
+				<h3>Register</h3>
+				<form id="REGISTER">
+					<input type="text" name="login" placeholder="login"/><br/>
+					<input type="text" name="password"/><br/>
+					<input type="submit" value="submit"/>
+				</form>
+			</div>
+			<div>
+				<h3>Authenticate</h3>
+				<form id="AUTHENTICATE">
+					<input type="text" name="login" placeholder="login"/><br/>
+					<input type="text" name="password"/><br/>
+					<input type="submit" value="submit"/>
+				</form>
+			</div>
+			<div style="display:inline-block; width:24%;">
+				<h3>POST Table A</h3>
+				<form id="POST_A">
+					<input type="text" name="spam" placeholder="spam" value="1"/><br/>
+					<input type="text" name="eggs" placeholder="eggs" value="See the holy grail lies over the horizon"/><br/>
+					<input type="text" name="bacon" placeholder="bacon" value="foo bar"/><br/>
+					<input type="submit" value="submit"/>
+				</form>
+			</div>
+			<div style="display:inline-block; width:24%;">
+				<h3>GET Table A</h3>
+				<form id="GET_A">
+					<input type="text" name="id" placeholder="id" value=""/><br/>
+					<input type="submit" value="submit"/>
+				</form>
+			</div>
+			<div style="display:inline-block; width:24%;">
+				<h3>PUT Table A</h3>
+				<form id="PUT_A">
+					<input type="text" name="id" placeholder="id" value="1"/><br/>
+					<input type="text" name="spam" placeholder="spam" value="1"/><br/>
+					<input type="text" name="eggs" placeholder="spam" value="See the holy grail lies over the horizon"/><br/>
+					<input type="text" name="bacon" placeholder="spam" value="foo bar"/><br/>
+					<input type="submit" value="submit"/>
+				</form>
+			</div>
+			<div style="display:inline-block; width:24%;">
+				<h3>DELETE Table A</h3>
+				<form id="DELETE_A">
+					<input type="text" name="id" placeholder="id" value="1"/><br/>
+					<input type="submit" value="submit"/>
+				</form>
+			</div>
+
+			<div style="display:inline-block; width:24%;">
+				<h3>POST Table B</h3>
+				<form id="POST_B">
+					<input type="text" name="spam" placeholder="spam" value="1"/><br/>
+					<input type="text" name="eggs" placeholder="eggs" value="See the holy grail lies over the horizon"/><br/>
+					<input type="submit" value="submit"/>
+				</form>
+			</div>
+			<div style="display:inline-block; width:24%;">
+				<h3>GET Table B</h3>
+				<form id="GET_B">
+					<input type="text" name="id" placeholder="id" value=""/><br/>
+					<input type="submit" value="submit"/>
+				</form>
+			</div>
+			<div style="display:inline-block; width:24%;">
+				<h3>PUT Table B</h3>
+				<form id="PUT_B">
+					<input type="text" name="id" placeholder="id" value="1"/><br/>
+					<input type="text" name="spam" placeholder="spam" value="1"/><br/>
+					<input type="text" name="eggs" placeholder="spam" value="See the holy grail lies over the horizon"/><br/>
+					<input type="text" name="bacon" placeholder="spam" value="foo bar"/><br/>
+					<input type="submit" value="submit"/>
+				</form>
+			</div>
+			<div style="display:inline-block; width:24%;">
+				<h3>DELETE Table B</h3>
+				<form id="DELETE_B">
+					<input type="text" name="id" placeholder="id" value="1"/><br/>
+					<input type="submit" value="submit"/>
+				</form>
+			</div>
+		</div>
+		<div>
+			<h3>Status</h3>
+			<div id="status">
+			</div>	
+			<h3>Data</h3>		
+			<div id="data">
+			</div>
+			<h3>Location header</h3>
+			<div id="location_header">
+			</div>
+		</div>
 	</body>
 </html>
 

@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Test DB</title>
+
+		<meta charset='utf-8'/>
+		<meta name='viewport' content='width=device-width, initial-scale=1'/>
+		<meta name='mobile-web-app-capable' content='yes' />
+		<meta name='apple-mobile-web-app-capable' content='yes' />
+		<meta name='apple-mobile-web-app-status-bar-style' content='black-translucent' />
+		<meta http-equiv='expires' content='0' />
+
+		<link rel='icon' href='images/icon/64.png'/>
+		<link rel='apple-touch-icon' href='images/icon/128.png'/>
+
+		<!-- frameworks -->
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+
+		<!-- custom -->
+		<script type='text/javascript'>
+			// POST
+			$(document).on('click','#POST',function(){
+				$.ajax({
+					type: 'POST',
+					dataType: 'json',
+					url: 'api/index.php/testtable/',
+					data: {'spam':Math.round(100*Math.random()), 'eggs':'See the holy grail lies over the horizon', 'bacon':'foo bar'},
+					headers: {'Authentication': 'token'},
+					success: function(data,status,response){
+						console.log('success');
+						console.log(data);
+						console.log(status);
+						console.log(response);
+						console.log(response.getResponseHeader('Location'));
+					},
+					error: function(data,status,response){
+						console.log('error');
+						console.log(data);
+						console.log(status);
+						console.log(response);
+					}
+				});
+			});
+			// GET ALL
+			$(document).on('click','#GET_ALL',function(){
+				$.ajax({
+					type: 'GET',
+					dataType: 'json',
+					url: 'api/index.php/testtable/',
+					headers: {'Authentication': 'token'},
+					success: function(data,status,response){
+						console.log('success');
+						console.log(data);
+						console.log(status);
+						console.log(response);
+					},
+					error: function(data,status,response){
+						console.log('error');
+						console.log(data);
+						console.log(status);
+						console.log(response);
+					}
+				});
+			});
+			// GET ONE
+			$(document).on('click','#GET_ONE',function(){
+				$.ajax({
+					type: 'GET',
+					dataType: 'json',
+					url: 'api/index.php/testtable/1',
+					headers: {'Authentication': 'token'},
+					success: function(data,status,response){
+						console.log('success');
+						console.log(data);
+						console.log(status);
+						console.log(response);
+					},
+					error: function(data,status,response){
+						console.log('error');
+						console.log(data);
+						console.log(status);
+						console.log(response);
+					}
+				});
+			});
+			// PUT
+			$(document).on('click','#PUT',function(){
+				$.ajax({
+					type: 'PUT',
+					dataType: 'json',
+					url: 'api/index.php/testtable/1',
+					data: {'spam':Math.round(100*Math.random()), 'eggs':'temp', 'bacon':'foo bar'},
+					headers: {'Authentication': 'token'},
+					success: function(data,status,response){
+						console.log('success');
+						console.log(data);
+						console.log(status);
+						console.log(response);
+					},
+					error: function(data,status,response){
+						console.log('error');
+						console.log(data);
+						console.log(status);
+						console.log(response);
+					}
+				});
+			});
+			// PUT WHERE
+			$(document).on('click','#PUT_WHERE',function(){
+				$.ajax({
+					type: 'PUT',
+					dataType: 'json',
+					url: 'api/index.php/testtable/eggs/temp',
+					data: {'spam':Math.round(100*Math.random()), 'eggs':'blablabla', 'bacon':'foo bar'},
+					headers: {'Authentication': 'token'},
+					success: function(data,status,response){
+						console.log('success');
+						console.log(data);
+						console.log(status);
+						console.log(response);
+					},
+					error: function(data,status,response){
+						console.log('error');
+						console.log(data);
+						console.log(status);
+						console.log(response);
+					}
+				});
+			});
+			// DELETE WHERE
+			$(document).on('click','#DELETE',function(){
+				$.ajax({
+					type: 'DELETE',
+					dataType: 'json',
+					url: 'api/index.php/testtable/10',
+					headers: {'Authentication': 'token'},
+					success: function(data,status,response){
+						console.log('success');
+						console.log(data);
+						console.log(status);
+						console.log(response);
+					},
+					error: function(data,status,response){
+						console.log('error');
+						console.log(data);
+						console.log(status);
+						console.log(response);
+					}
+				});
+			});
+		</script>
+	</head>
+	<body>
+		<a id="POST" href="#">POST</a>
+		<a id="GET_ALL" href="#">GET ALL</a>
+		<a id="GET_ONE" href="#">GET ONE</a>
+		<a id="PUT" href="#">PUT</a>
+		<a id="PUT_WHERE" href="#">PUT_WHERE</a>
+		<a id="DELETE" href="#">DELETE</a>
+	</body>
+</html>
+
+

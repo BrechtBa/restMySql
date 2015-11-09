@@ -18,23 +18,25 @@
 		$stmt->setFetchMode(PDO::FETCH_ASSOC);
 
 		if( $user = $stmt->fetch() ){
-			
-			// set the valid database operations for the user
-			if( $user['permission'] >= 9 ){
-				$valid_uri = ['POST' => ['*'], 'GET' => ['*'], 'PUT' => ['*'], 'DELETE' => ['*']];
-				$valid_data = [];
+
+			// parse the valid uri's to replace %s with the user id
+			$user_valid_uri = [];
+			foreach($valid_uri[ $user['permission'] ] as $request => $uri_list){
+				$parsed_uri_list = [];
+				foreach($uri_list as $uri){
+					$parsed_uri_list[] = sprintf($uri,$user['id']);
+				}
+				$user_valid_uri[$request] = $parsed_uri_list;	
 			}
-			else{
-				$valid_uri = ['POST' => ['table_b'], 
-                              'GET' => ['table_a',sprintf('table_b/user_id/%s',$user['id'])],
-                              'PUT' => [sprintf('table_b/user_id/%s',$user['id'])],
-                              'DELETE' => [sprintf('table_b/user_id/%s',$user['id'])]
-                             ];
-				$valid_data = ['user_id'=>$user['id']];
+
+			// parse the valid data to replace %s with the user id
+			$user_valid_data = [];
+			foreach($valid_data[ $user['permission'] ] as $key => $val){
+				$user_valid_data[$key] = sprintf($val,$user['id']);
 			}
 
 			// generate a json web token
-			$payload = ['user_id'=>$user['id'],'permission'=>$user['permission'],'valid_uri'=>$valid_uri,'valid_data'=>$valid_data];
+			$payload = ['user_id'=>$user['id'],'permission'=>$user['permission'],'valid_uri'=>$user_valid_uri,'valid_data'=>$user_valid_data];
 			$token = jwt_encode($payload);
 			$response_http = response_http(201);
 

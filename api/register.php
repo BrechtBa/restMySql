@@ -25,10 +25,10 @@
 			$stmt->execute();
 			$numUsers = $stmt->fetchColumn();	
 			if($numUsers==0){
-				$permission = 9;
+				$permission = ADMIN_PERMISSION;
 			}
 			else{
-				$permission = 1;
+				$permission = DEFAULT_PERMISSION;
 			}
 
 			// add the user to the database

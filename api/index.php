@@ -53,26 +53,31 @@
 					// parse data
 					$keys = [];
 					$vals = [];
+					$valid = true;
 					foreach($_POST as $key => $val){
-						
+						$valid = $valid && check_data($key,$val,$valid_data);
 						$keys[] = $key;
-						$vals[] = "'".check_data($key,$val,$valid_data)."'";
+						$vals[] = "'".$val."'";
 					}
-			
-					// generate query
-					$query = sprintf( "INSERT INTO %s (%s)  VALUES (%s)" ,$loc[0],implode(',',$keys),implode(',',$vals) );
-					$stmt = $db->prepare($query);
-					$stmt->execute();
+					if($valid){
+						// generate query
+						$query = sprintf( "INSERT INTO %s (%s)  VALUES (%s)" ,$loc[0],implode(',',$keys),implode(',',$vals) );
+						$stmt = $db->prepare($query);
+						$stmt->execute();
 
 
-					// get the last inserted id
-					$stmt = $db->query( "SELECT LAST_INSERT_ID()" );
-					$id = $stmt->fetch(PDO::FETCH_NUM);
-					$id = $id[0];
+						// get the last inserted id
+						$stmt = $db->query( "SELECT LAST_INSERT_ID()" );
+						$id = $stmt->fetch(PDO::FETCH_NUM);
+						$id = $id[0];
 
-					// generate the uri to get the last inserted item
-					$response_location = sprintf('%s/%s',$loc[0],$id);
-					$response_http = response_http(201);
+						// generate the uri to get the last inserted item
+						$response_location = sprintf('%s/%s',$loc[0],$id);
+						$response_http = response_http(201);
+					}
+					else{
+						$response_http = response_http(403);
+					}
 				}
 				else{
 					$response_http = response_http(403);
@@ -125,27 +130,33 @@
 					// parse data
 					parse_str(file_get_contents("php://input"),$post_vars);
 					$keyvals = [];
+					$valid = true;
 					foreach($post_vars as $key => $val){
-						$keyvals[] = $key."='".check_data($key,$val,$valid_data)."'";
+						$valid = $valid && check_data($key,$val,$valid_data);
+						$keyvals[] = $key."='".$val."'";
 					}
-			
-					// generate query
-					switch(sizeof($loc)){
-						case 2:
-							$query = sprintf( "UPDATE %s SET %s WHERE id=%s" ,$loc[0],implode(',',$keyvals),$loc[1] );
-							break;
-						case 3:
-							$query = sprintf( "UPDATE %s SET %s WHERE %s='%s'" ,$loc[0],implode(',',$keyvals),$loc[1],$loc[2] );
-							break;
-						case 5:
-							$query = sprintf( "UPDATE %s SET %s WHERE %s='%s' AND %s='%s'" ,$loc[0],implode(',',$keyvals),$loc[1],$loc[2],$loc[3],$loc[4] );
-							break;
+					if($valid){
+						// generate query
+						switch(sizeof($loc)){
+							case 2:
+								$query = sprintf( "UPDATE %s SET %s WHERE id=%s" ,$loc[0],implode(',',$keyvals),$loc[1] );
+								break;
+							case 3:
+								$query = sprintf( "UPDATE %s SET %s WHERE %s='%s'" ,$loc[0],implode(',',$keyvals),$loc[1],$loc[2] );
+								break;
+							case 5:
+								$query = sprintf( "UPDATE %s SET %s WHERE %s='%s' AND %s='%s'" ,$loc[0],implode(',',$keyvals),$loc[1],$loc[2],$loc[3],$loc[4] );
+								break;
+						}
+
+						$stmt = $db->prepare($query);
+						$stmt->execute();
+
+						$response_http = response_http(201);
 					}
-
-					$stmt = $db->prepare($query);
-					$stmt->execute();
-
-					$response_http = response_http(201);
+					else{
+						$response_http = response_http(403);
+					}
 				}
 				else{
 					$response_http = response_http(403);
@@ -215,14 +226,14 @@
 // check_data
 ////////////////////////////////////////////////////////////////////////////////
 	function check_data($key,$val,$valid_data){
-		
+		$valid = true;
 		foreach($valid_data as $valid_key => $valid_val){
-			if($key == $valid_key){
-				$val = $valid_val;
+			if($key == $valid_key && $val != $valid_val){
+				$valid = false;
 				break;
 			}
 		}
-		return $val;
+		return $valid;
 	}
 
 ?>
